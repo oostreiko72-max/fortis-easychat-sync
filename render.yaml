@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: fortis-easychat-sync
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: FITBASE_DOMAIN
+        value: j50552
+      - key: FITBASE_CHAT_ID
+        value: "254411210"
+      - key: FITBASE_CHANNEL_ID
+        value: "5885"
+      - key: FITBASE_COOKIE
+        sync: false
+      - key: SYNC_KEY
+        generateValue: true
+      - key: DIALOGUE_PAGE_SIZE
+        value: "200"
+      - key: MESSAGE_PAGE_SIZE
+        value: "20"
+      - key: MAX_MESSAGE_PAGES
+        value: "100"
+      - key: REQUEST_DELAY_MS
+        value: "50"
+      - key: TOKEN_CAPTURE_TIMEOUT_MS
+        value: "60000"
