@@ -1,0 +1,154 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FORTIS — карта автодействий для команды</title><meta name="theme-color" content="#575F6C"><meta name="description" content="Обучающая карта автодействий Fortis: три воронки и глобальные правила Fitbase, триггеры, условия, действия, тексты и ссылки">
+<style>
+:root{--bg:#ebebeb;--fg:#575f6c;--taupe:#b8aea9;--line:#dad9d7;--paper:#fff;--mute:#747983}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--taupe);outline-offset:2px}
+header{background:white;border-bottom:1px solid var(--line)}.header{max-width:1700px;margin:auto;padding:18px 25px;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-size:23px;font-weight:850;letter-spacing:.16em}.brand span{color:var(--taupe)}.source{font-size:11px;text-align:right;color:var(--mute)}
+main{max-width:1700px;margin:auto;padding:22px 25px 70px}h1{font-size:clamp(23px,2.5vw,31px);margin:0;letter-spacing:-.035em}.sub{font-size:13px;color:var(--mute);margin:5px 0 14px}
+.disclaimer{background:white;border:1px solid #dbd3c4;border-left:4px solid #bca47a;border-radius:9px;padding:11px 14px;margin:0 0 15px;font-size:12px;line-height:1.6;color:#71695f}
+nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}nav button{white-space:nowrap;color:var(--fg);border:1px solid var(--line);border-radius:9px;background:white;padding:10px 15px;font-size:12px;font-weight:770}
+nav button.active{background:var(--fg);border-color:var(--fg);color:white}nav button small{font-weight:500;opacity:.7}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:16px 0 10px}
+.controls input{flex:1 1 290px;min-width:140px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:11px 13px;color:var(--fg)}
+.controls select,.controls button{background:#fff;border:1px solid var(--line);border-radius:8px;padding:11px 12px;color:var(--fg)}.controls select{max-width:210px}
+.above{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}.summary{font-size:11px;color:var(--mute)}.arrows{display:flex;gap:5px}.arrows button{padding:5px 11px;background:white;border:1px solid var(--line);border-radius:7px;color:var(--fg)}
+.board{display:flex;align-items:flex-start;gap:12px;overflow-x:auto;padding:3px 2px 20px;scrollbar-width:thin;scroll-snap-type:x proximity;min-height:230px}
+.stage{flex:0 0 278px;width:278px;background:#f6f6f6;border:1px solid var(--line);border-radius:11px;overflow:hidden;scroll-snap-align:start}
+.head{border-top:5px solid var(--stage,#b8aea9);background:white;padding:13px}.code{color:#8f8178;font-weight:850;font-size:11px}.stitle{font-weight:800;font-size:15px;margin:4px 0 9px;line-height:1.35}.description{font-size:11px;line-height:1.55}.duty{margin-top:6px;color:var(--mute);font-size:11px;line-height:1.5}.s-count{border-top:1px solid #eee;margin-top:10px;padding-top:8px;color:var(--mute);font-size:10px}
+.stack{padding:8px;display:flex;flex-direction:column;gap:6px}
+.rule{border:1px solid var(--line);border-radius:8px;background:white;overflow:hidden}.rule[open]{border-color:#b8aea9}.rule.off{opacity:.78}
+.rule summary{cursor:pointer;list-style:none;display:flex;align-items:flex-start;gap:8px;padding:10px}.rule summary::-webkit-details-marker{display:none}
+.seq{min-width:46px;font-size:11px;font-weight:800;color:#8b796f;flex:none}.rmain{flex:1;min-width:0}.rname{font-size:11.5px;line-height:1.4;font-weight:750;overflow-wrap:anywhere}.rmeta{margin-top:7px;display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.tag{padding:3px 6px;border-radius:5px;font-size:10px;font-weight:770;line-height:1.25;white-space:nowrap}
+.k-funnel{background:#e6efe9;color:#4c705f}.k-task{background:#e7edf5;color:#526783}.k-msg{background:#f7ecdf;color:#896a45}
+.k-bonus{background:#f0eafa;color:#78619a}.k-push{background:#e3f0ef;color:#44756d}.k-tag{background:#edecf1;color:#6a6877}.k-lead{background:#f6e9ed;color:#946475}
+.gray{color:var(--mute);font-size:10px}.twist{color:#97979a;font-size:13px}.rule[open] .twist{transform:rotate(180deg)}
+.details{padding:11px 12px;border-top:1px solid var(--line);font-size:11px;line-height:1.6;overflow-wrap:anywhere}
+.field{border-bottom:1px solid #eeeded;padding-bottom:8px;margin-bottom:9px}.key{font-size:10px;font-weight:790;color:#998f89;margin-bottom:3px}
+.conds{display:flex;flex-direction:column;gap:4px}.conds div{border-bottom:1px dashed #eee;padding-bottom:4px}.conds b{color:#8d8986}
+.textbody{white-space:pre-wrap;overflow-wrap:anywhere;border-radius:7px;background:#f5f4f2;margin:6px 0 10px;padding:11px;line-height:1.65}
+.warn{background:#faf5eb;border-left:3px solid #bf9f66;border-radius:3px;padding:8px 9px;font-size:10px;line-height:1.5;margin:8px 0}
+.ops{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.ops a,.ops button{border:0;padding:9px 10px;border-radius:6px;font-size:11px;font-weight:730;text-decoration:none}
+.ops a{flex:1;text-align:center;background:var(--fg);color:white}.ops button{color:var(--fg);background:#eeedeb}
+.global{max-width:780px;display:flex;flex-direction:column;gap:7px}.global .rule summary{padding:12px}.global .rname{font-size:12px}.global .seq{min-width:56px}
+.empty{background:white;border:1px solid var(--line);padding:18px;border-radius:9px;font-size:12px;color:var(--mute)}
+.legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}.legend span{padding:5px 8px}
+footer{margin-top:22px;padding-top:13px;border-top:1px solid var(--line);color:var(--mute);font-size:11px;line-height:1.7}
+@media(max-width:640px){.header{padding:13px 14px}.brand{font-size:18px}main{padding:16px 12px 45px}.stage{width:276px;flex-basis:276px}.source{font-size:10px}.controls select{max-width:155px}nav button{padding:9px 12px}}
+</style></head><body>
+<header><div class="header"><div class="brand">FORTIS<span> / FITBASE</span></div><div class="source">Карта для сотрудников<br>Данные CRM: 20.11.2026</div></div></header>
+<main><h1>Воронки и автодействия</h1><div class="sub">Схема CRM, инструкции по этапам и реальные карточки Fitbase. Нажмите на действие, чтобы раскрыть подробности.</div>
+<div class="disclaimer"><strong>Источники:</strong> сохранённая проверка настроек Fitbase от 20 ноября 2026 года и последующие подтверждения владельца. Удалённое правило ID 176 не показывается; ID 322 добавлено по подтверждению владельца. <strong>Это не прямая синхронизация с Fitbase:</strong> изменения после 20 ноября, неполные тексты и фактические цвета этапов требуют сверки по ссылкам в CRM. Исправленные после выгрузки тексты не подменяются устаревшими.</div>
+<nav id="tabs" aria-label="Воронки"></nav>
+<div class="controls"><input id="search" type="search" aria-label="Поиск" placeholder="Поиск по номеру, названию, условию, тексту…"><select id="kind" aria-label="Тип действия"><option value="">Все действия</option><option>Воронка</option><option>Задача</option><option>Сообщение</option><option>Начисление бонусов</option><option>Push</option><option>Тег</option><option>Заявка</option></select><select id="status" aria-label="Статус"><option value="">Все статусы</option><option value="active">Включены в реестре</option><option value="inactive">Выключены в реестре</option></select><button id="reset">Сбросить</button></div>
+<div class="above"><div class="summary" id="total">Загрузка реестра…</div><div class="arrows" id="arrows"><button id="left" aria-label="Предыдущий этап">←</button><button id="right" aria-label="Следующий этап">→</button></div></div>
+<div class="board" id="board"></div><div id="legend" class="legend"></div>
+<footer>«Цель» и «Задача этапа» — инструкция Fortis для персонала. Названия, триггеры, условия и действия в раскрывающихся карточках взяты из сохранённых данных Fitbase; если поле не было извлечено, оно отмечено как неподтверждённое. Цвета этапов показаны в фирменной палитре до отдельной проверки оттенков CRM. Эта страница не изменяет настройки Fitbase.</footer>
+</main>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const E=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const goal={
+'1.1':['Первый контакт в течение 15 минут в рабочее время.','Перед звонком открыть карточку, проверить покупки, записи и историю контактов.'],
+'1.2':['Установить контакт после недозвона.','Проверить попытки и сообщения, согласовать следующее касание.'],
+'1.3':['Подобрать направление и время тренировки.','Уточнить цель, ограничения и удобные слоты.'],
+'1.4':['Помочь принять решение о тренировке.','Разобрать сомнения и записать договорённость.'],
+'1.5':['Получить выбор из отправленных вариантов.','Проверить ответ и помочь с записью.'],
+'1.6':['Довести запись до оплаты.','Сверить покупки и будущие записи перед контактом.'],
+'1.7':['Записать купившего разовую пробную.','Проверить оплату и предложить удобное занятие.'],
+'1.8':['Довести записанного до фактического посещения.','Проверить статус записи; при неявке использовать глобальное правило Г-3.'],
+'1.9':['Предложить основной абонемент после пробной.','Узнать впечатления, проверить покупку, рассказать о Fortis10.'],
+'1.10':['Провести первое занятие пробной недели: 3 тренировки за 7 дней.','Проверить покупки, будущие записи, неявки, срок и первое фактическое посещение.'],
+'1.11':['Завершить пробную неделю и предложить абонемент.','Контролировать остаток 2/1/0, будущие записи и дату окончания пакета.'],
+'1.12':['Помочь продолжить занятия после пробной недели.','Проверить покупку абонемента и историю сообщений.'],
+'1.13':['Сохранить контакт с отложенным запросом.','Зафиксировать дату следующего контакта.'],
+'2.1':['Сопроводить первую покупку и активацию.','Проверить пакет, записи и начало занятий.'],
+'2.2':['Восстановить регулярность занятий.','Проверить последнюю тренировку и будущие записи.'],
+'2.3':['Подготовить продление до окончания абонемента.','Проверить срок, остаток и будущие записи.'],
+'2.4':['Довести предложение продления до покупки.','Исключить повторные напоминания продлившему клиенту.'],
+'2.5':['Поддержать связь на паузе.','Уточнить дату возвращения.'],
+'2.6':['Сопроводить персональных и непродлённых клиентов.','Проверить услуги и причину прекращения занятий.'],
+'2.14':['Сохранить вовлечённость во втором месяце.','Проверить посещаемость и записи.'],
+'3.1':['Установить контакт с ранее недозвонившимся.','Проверить историю и покупки перед звонком.'],
+'3.2':['Вернуть интересовавшегося к записи.','Уточнить актуальность и предложить подходящие занятия.'],
+'3.3':['Вернуть клиента после пробной без абонемента.','Проверить посещения, покупки и историю предложений.'],
+'3.4':['Вернуть клиента после завершения абонемента.','Проверить продления и избежать контакта с вернувшимися.'],
+'3.5':['Возобновить отложенный разговор.','Учесть дату и причину паузы.'],
+'3.7':['Вернуть интерес к персональным тренировкам.','Уточнить цель, тренера и удобный формат.']
+};
+const styles={'Воронка':['k-funnel','⑂'],'Задача':['k-task','☷'],'Сообщение':['k-msg','◌'],'Начисление бонусов':['k-bonus','✦'],'Push':['k-push','♧'],'Тег':['k-tag','⌑'],'Заявка':['k-lead','＋']};
+const cols=['#B8AEA9','#A8B9B6','#B7BAC2','#C1B4A7','#B0B9B4','#B7ABC0','#B9B4A7','#AEC0B8','#B8AAB0','#A8B6C0','#C2B5AE','#ABC0B9','#B4BAC0'];
+const altered=new Set([1,132,213,214,246,277,280,317]);const reviewed=new Set([1,21,132,174,175,188,189,213,214,224,225,244,246,248,255,256,276,277,280,297,316,317]);
+const num=a=>{let m=String(a.real_name||'').match(/^\s*([123]\.\d+(?:\.\d+)?[а-яa-z]?)/i);if(m)return m[1];m=String(a.real_name||'').match(/^\s*Г\s*[-–]?\s*(\d+)/i);return m?'Г-'+m[1]:(a.stage==='Г'?'Общее':a.stage)};
+const title=a=>String(a.real_name||a.title||'Без названия').replace(/^\s*(?:[123]\.\d+(?:\.\d+)?[а-яa-z]?|Г\s*[-–]?\s*\d+)\s*[-—–:.]?\s*/i,'').trim();
+const typ=a=>{let s=String(a.kind||'')+' '+String(a.crm?.action||'');if(/бонус/i.test(s))return 'Начисление бонусов';if(/push/i.test(s))return 'Push';if(/тег/i.test(s))return 'Тег';if(/заявк|create_lead/i.test(s))return 'Заявка';if(/переход|смена этапа|lead_change_step/i.test(s))return 'Воронка';if(/сообщен|send_social|рассыл/i.test(s))return 'Сообщение';return 'Задача'};
+const active=a=>a.status==='ВКЛЮЧЕНО'||/СОЗДАНО/.test(a.status||'');
+const order=(a,b)=>{function n(x){let m=num(x).match(/^(\d+)\.(\d+)(?:\.(\d+))?([а-яa-z])?/i);if(m)return [+m[1],+m[2],+(m[3]||0),m[4]||''];let g=num(x).match(/Г-(\d+)/);return g?[9,+g[1],0,'']:[99,0,0,'']}let x=n(a),y=n(b);for(let k=0;k<3;k++)if(x[k]!==y[k])return x[k]-y[k];return x[3].localeCompare(y[3],'ru')||a.fitbase_id-b.fitbase_id};
+const field=(k,v)=>v&&String(v).trim()&&String(v)!=='Не извлечены для этого ID'?'<div class="field"><div class="key">'+E(k)+'</div>'+E(v)+'</div>':'';
+let DATA=null,chosen='1';
+async function load(){
+try{
+const r=await fetch('./index.html',{cache:'no-cache'});if(!r.ok)throw Error('HTTP '+r.status);
+const s=await r.text();let st=s.indexOf('const DATA=');if(st<0)throw Error('Нет реестра DATA в исходном сайте');
+st+='const DATA='.length;let end=s.indexOf(';\n',st);if(end<0)throw Error('Не найден конец реестра');DATA=JSON.parse(s.slice(st,end));
+DATA.actions=DATA.actions.filter(a=>![176,247].includes(a.fitbase_id));
+DATA.actions.push({stage:'1.11',fitbase_id:322,real_name:'1.11.4 — Пробная неделя в процессе — осталось 3 дня',kind:'Задача',status:'СОЗДАНО по сообщению владельца',trigger:'Не подтверждён',timing:'За 3 дня до конца недели — сверить в Fitbase',conditions:'Точные фильтры не подтверждены',task_text:'Согласованный текст инструкции (не подтверждён как текст в Fitbase):\nПроверить дату окончания пробной недели, остаток занятий и будущие записи. Если записи есть — убедиться, что занятия до окончания срока. Если занятий не хватает — связаться и помочь с записью. Если все занятия использованы — проверить переход в 1.12. Если основной абонемент куплен — не беспокоить клиента. Зафиксировать результат в CRM.',source:'https://j50552.fitbase.io/AutomaticAction/automatic/update?id=322',notes:'Добавлено по сообщению владельца после 20.11. Возможен дубль номера 1.11.4 с ID 244. Проверить текущие условия.',crm:{action:'Создать задачу',lead:'Этап 1.11 (уточнить)',service:'3 тренировки за 7 дней (уточнить)',timing:'За 3 дня до окончания (уточнить)'}});
+render();
+}catch(e){$('#total').textContent='Не удалось открыть реестр';$('#board').innerHTML='<div class="empty">Не удалось загрузить данные из существующей карты Fortis. '+E(e.message)+'</div>'}
+}
+function match(a){
+let k=$('#kind').value,q=$('#search').value.trim().toLowerCase().replace(/ё/g,'е'),z=$('#status').value;
+if(k&&typ(a)!==k)return false;if(z==='active'&&!active(a))return false;if(z==='inactive'&&active(a))return false;
+if(!q)return true;let blob=[a.fitbase_id,a.real_name,a.title,a.trigger,a.when,a.timing,a.crm?.lead,a.crm?.service,a.crm?.contract,a.crm?.action,a.crm?.target,a.body,a.task_text].join(' ').toLowerCase().replace(/ё/g,'е');return blob.includes(q)
+}
+function card(a){
+let cm=a.crm||{},k=typ(a),look=styles[k]||styles['Задача'];let recent=reviewed.has(a.fitbase_id)||a.fitbase_id===322;
+let rawText=a.task_text&&!/Полный текст сообщения или задачи не извлечён/.test(a.task_text)?a.task_text:(!/Полный текст сообщения или задачи не извлечён/.test(a.body||'')?a.body:'');
+if(altered.has(a.fitbase_id))rawText='';
+let incomplete=/\.\.\.|обрезан|сокращён|не извлечён/i.test((a.notes||'')+' '+(rawText||''));
+let cond=[['Филиал',cm.branch],['Заявка / этап',cm.lead],['Абонемент',cm.contract],['Услуга',cm.service],['Клиент',cm.client]];
+cond=cond.filter(x=>x[1]&&!['—','N/A','Не подтверждено','Не применимо'].includes(String(x[1]).trim()));
+let cs=cond.length?'<div class="conds">'+cond.map(x=>'<div><b>'+E(x[0])+':</b> '+E(x[1])+'</div>').join('')+'</div>':'Не подтверждены в сохранённом реестре';
+let src=String(a.source||'');if(!src.startsWith('https://j50552.fitbase.io/'))src='https://j50552.fitbase.io/AutomaticAction/automatic/update?id='+a.fitbase_id;
+let name=title(a)||String(a.real_name||'');let note=recent?'<div class="warn">После выгрузки 20.11 это правило обсуждалось или менялось. Текущее состояние необходимо проверить в Fitbase.</div>':'';
+if(altered.has(a.fitbase_id))note+='<div class="warn">Старый текст скрыт, поскольку владелец подтвердил его исправление после выгрузки. Актуальную версию смотрите в Fitbase.</div>';
+if(incomplete)note+='<div class="warn">Сохранённый текст извлечён не полностью; это не весь текст сообщения / задачи в Fitbase.</div>';
+if(a.fitbase_id===322)note+='<div class="warn">Возможно совпадение номера 1.11.4 с ID 244. Проверьте нумерацию.</div>';
+return '<details class="rule '+(!active(a)?'off':'')+'"><summary><span class="seq">'+E(num(a))+'</span><div class="rmain"><div class="rname">'+E(name)+'</div><div class="rmeta"><span class="tag '+look[0]+'">'+look[1]+' '+E(k)+'</span><span class="gray">ID '+E(a.fitbase_id)+'</span>'+(!active(a)?'<span class="gray">· выключено</span>':'')+'</div></div><span class="twist">⌄</span></summary><div class="details">'+
+field('Название в Fitbase',a.real_name)+field('Триггер',cm.trigger||a.trigger)+field('Когда',cm.timing||a.timing||a.when)+
+'<div class="field"><div class="key">Условия</div>'+cs+'</div>'+field('Действие',cm.action||a.action||k)+field('Целевой этап / результат',cm.target)+field('Параметры задачи / сообщения',cm.task_parameters)+
+(rawText?'<div class="key">Текст задачи / сообщения</div><div class="textbody">'+E(rawText)+'</div>':'')+
+note+'<div class="ops"><a target="_blank" rel="noopener noreferrer" href="'+E(src)+'">Открыть в Fitbase ↗</a>'+(rawText?'<button type="button" class="copy" data-id="'+E(a.fitbase_id)+'">Копировать текст</button>':'')+'</div></div></details>'
+}
+function render(){
+if(!DATA)return;
+let labels=[['1','1 · Новые заявки'],['2','2 · Активные клиенты'],['3','3 · Реактивация'],['Г','Глобальные / общие']];
+$('#tabs').innerHTML=labels.map(x=>'<button type="button" class="'+(chosen===x[0]?'active':'')+'" data-tab="'+x[0]+'">'+x[1]+' <small>'+DATA.actions.filter(a=>a.stage===x[0]).length+'</small></button>').join('');
+let a=DATA.actions.filter(x=>x.stage===chosen&&match(x)).sort(order);
+$('#total').textContent='Найдено: '+a.length+' автодействий'+(chosen==='Г'?' · вне воронок':' · этапы прокручиваются по горизонтали');
+$('#arrows').style.display=chosen==='Г'?'none':'flex';
+let board=$('#board');
+if(chosen==='Г'){board.className='global';board.innerHTML=a.length?a.map(card).join(''):'<div class="empty">Ничего не найдено</div>';return}
+board.className='board';
+let list=DATA.stages[chosen]||[];
+board.innerHTML=list.map((x,i)=>{
+let z=x.split('|'),n=z[0],t=z.slice(1).join('|'),acts=a.filter(v=>v.stage===n);
+if(!acts.length&&$('#search').value.trim())return '';
+let gg=goal[n]||['Обработать заявку на этапе.','Проверить клиента и следующий шаг.'];
+return '<section class="stage" style="--stage:'+cols[(i+4*(+chosen-1))%cols.length]+'"><div class="head"><div class="code">ЭТАП '+E(n)+'</div><div class="stitle">'+E(t)+'</div><div class="description"><b>Цель:</b> '+E(gg[0])+'</div><div class="duty"><b>Задача:</b> '+E(gg[1])+'</div><div class="s-count">'+acts.length+' автодействий</div></div><div class="stack">'+(acts.length?acts.map(card).join(''):'<div class="empty">Нет автодействий по фильтру</div>')+'</div></section>'
+}).join('')||'<div class="empty">Нет результатов</div>'
+}
+$('#legend').innerHTML=Object.keys(styles).map(k=>'<span class="tag '+styles[k][0]+'">'+styles[k][1]+' '+E(k)+'</span>').join('');
+$('#tabs').addEventListener('click',e=>{let b=e.target.closest('[data-tab]');if(b){chosen=b.dataset.tab;render();$('#board').scrollLeft=0}});
+['search','kind','status'].forEach(n=>$('#'+n).addEventListener(n==='search'?'input':'change',render));
+$('#reset').addEventListener('click',()=>{['search','kind','status'].forEach(n=>$('#'+n).value='');render()});
+$('#left').addEventListener('click',()=>$('#board').scrollBy({left:-290,behavior:'smooth'}));
+$('#right').addEventListener('click',()=>$('#board').scrollBy({left:290,behavior:'smooth'}));
+$('#board').addEventListener('click',e=>{let b=e.target.closest('.copy');if(!b||!DATA)return;let a=DATA.actions.find(x=>String(x.fitbase_id)===b.dataset.id);if(!a)return;let t=a.task_text||a.body||'';if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>{b.textContent='Скопировано';setTimeout(()=>b.textContent='Копировать текст',1600)}).catch(()=>{b.textContent='Ошибка копирования'})});
+load();
+})();
+</script>
+</body></html>
