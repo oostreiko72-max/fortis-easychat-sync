@@ -102,3 +102,11 @@
 }
 .rule .field.fe-status-field > .key::after {content:':';}
 .rule .field.fe-status-field > div:not(.key) {font-size:11px;font-weight:700;}
+
+/* Сообщения: отдельный светло-сиреневый цвет, только метка. */
+.rule .kind.message {
+  background:#f1eafa;
+  color:#745b99;
+  border:1px solid #e3d6f3;
+  font-weight:750;
+}
