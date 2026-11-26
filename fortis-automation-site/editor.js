@@ -293,7 +293,7 @@
     var fields=Array.isArray(data.fields)?data.fields:[];
     var html=fields.filter(function(f){return f && String(f.label||'').trim()}).map(function (f){
       var val=String(f.value||'');
-      return '<div class="field"><div class="key">'+esc(f.label)+' <span class="stamp">Изменено на сайте</span></div>'
+      return '<div class="field"><div class="key">'+esc(f.label)+'</div>'
        + (f.body?'<div class="bodytext">'+esc(val)+'</div>':'<div class="fe-edit-value">'+esc(val)+'</div>')+'</div>';
     }).join('');
     var notes=String(data.notes||'').trim();
