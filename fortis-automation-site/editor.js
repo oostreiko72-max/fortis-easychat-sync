@@ -155,7 +155,7 @@
     modal.id='fe-dialog';
     modal.className='fe-dialog';
     modal.innerHTML =
-       '<form id="fe-form">'
+       '<form id="fe-form" novalidate>'
      + '<div class="fe-dialog__header"><div><h2 id="fe-title">Редактировать</h2><p>Изменения сайта не меняют настройки CRM Fitbase</p></div>'
      + '<button type="button" class="fe-headclose" data-fe-action="close" aria-label="Закрыть">×</button></div>'
      + '<div class="fe-dialog__content">'
