@@ -48,13 +48,29 @@
 .fe-flash{position:fixed;z-index:99999;bottom:20px;right:20px;max-width:min(410px,calc(100vw - 32px));border-radius:10px;background:#575f6c;color:#fff;padding:12px 16px;box-shadow:0 6px 24px rgba(0,0,0,.17);font-size:12px;line-height:1.5}
 @media(max-width:640px){.fe-toolbar{padding:10px}.fe-toolbar__left,.fe-toolbar__right{width:100%}.fe-toolbar button,.fe-toolbar a{flex:1}.fe-dialog__content{padding:13px 13px 6px}.fe-dialog__header{padding:14px}.fe-dialog__footer{padding:10px}.fe-dialog .fe-grid{grid-template-columns:1fr}.fe-fieldrow{grid-template-columns:1fr auto}.fe-fieldrow .fe-key{grid-column:1/-1}.fe-fieldrow .fe-value{grid-column:1}.fe-fieldrow .fe-remove{grid-column:2;margin:0}}
 
-/* Выделяем только метки действий, карточки остаются нейтральными */
-.rule.staff-task,.rule.staff-call{background:#fff;border:1px solid var(--line);box-shadow:none}
-.rule.staff-task[open],.rule.staff-call[open]{border-color:#b8aea9}
-.rule.staff-task .kind.task{background:#f9e6e7;color:#a72e39;font-weight:800;border:1px solid #e7b6bb}
-.rule.staff-call .kind.phone{background:#ba3341;color:#fff;font-weight:810;border:1px solid #ba3341}
-.rule.staff-call .rname{color:inherit}
-.rule.staff-call summary::before{content:none;display:none}
+/* Только метка действия красная: никаких красных рамок/заливок карточек */
+.rule.staff-task,
+.rule.staff-call,
+.rule.staff-task[open],
+.rule.staff-call[open] {
+  background:#fff !important;
+  border:1px solid var(--line) !important;
+  box-shadow:none !important;
+}
+.rule.staff-call .rname {color:inherit !important}
+.rule.staff-call summary::before {content:none !important;display:none !important}
+.rule.staff-task .kind.task {
+  background:#f9e6e7;
+  color:#a72e39;
+  border:1px solid #e7b6bb;
+  font-weight:800;
+}
+.rule.staff-call .kind.phone {
+  background:#ba3341;
+  color:#fff;
+  border:1px solid #ba3341;
+  font-weight:810;
+}
 .fe-dialog .fe-checkbox.fe-call-choice{display:flex;flex-direction:row;align-items:center;gap:8px;font-size:12px;line-height:1.5;font-weight:700;background:#fdf0f0;border:1px solid #edd0d0;padding:10px;border-radius:8px}
 .fe-dialog .fe-checkbox.fe-call-choice input{width:18px;height:18px;flex:0 0 18px;accent-color:#b93440}
 .fe-dialog .fe-checkbox.fe-call-choice[hidden]{display:none}
