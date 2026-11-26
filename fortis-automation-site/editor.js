@@ -159,6 +159,14 @@
     if(id==='287')return 'Выключено'; // 2.1.13
     return value;
   }
+  function formatWhenLabel(value) {
+    var s=String(value||'');
+    s=s.replace(/^\s*immediate\s*[—–-]\s*/i,'');
+    s=s.replace(/\s*\(\s*offset\s*[-+]?\d+(?:\s*(?:мин|дней|дня|день))?(?:\s*[—–-]\s*[^)]*)?\s*\)/gi,'');
+    s=s.replace(/\s*\(\s*(?:задержка:\s*0|сдвиг\s*0\s*дней|смещение\s*0)\s*\)/gi,'');
+    s=s.replace(/^Задержка:\s*0\s*\(\s*День в день\s*\)$/i,'День в день');
+    return s.replace(/\s{2,}/g,' ').trim();
+  }
   function tidyCardDetails(card) {
     var details=q('.details',card);
     if(!details)return;
@@ -176,6 +184,10 @@
         if(label==='Условия'&&values.length) {
           var concise=compactSubscriptionCondition(values[0].textContent);
           if(concise!==values[0].textContent)values[0].textContent=concise;
+        }
+        if(label==='Когда'&&values.length) {
+          var readable=formatWhenLabel(values[0].textContent);
+          if(readable!==values[0].textContent)values[0].textContent=readable;
         }
       }
     });
