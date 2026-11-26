@@ -111,3 +111,20 @@
   border:1px solid #e3d6f3;
   font-weight:750;
 }
+
+/* Новые проекты правил: отдельно от 141 подтверждённого автодействия CRM. */
+.fe-proposals{margin:0 0 15px;background:#fff;border:1px solid #dcdad8;border-radius:10px;padding:12px 14px}
+.fe-proposals__heading{display:flex;justify-content:space-between;gap:7px;flex-wrap:wrap;margin-bottom:8px}
+.fe-proposals__heading strong{font-size:13px;color:#575f6c}
+.fe-proposals__heading span{font-size:11px;color:#82776f}
+.fe-proposal{border-top:1px solid #eee}
+.fe-proposal summary{display:flex;gap:10px;align-items:center;cursor:pointer;padding:10px 2px;list-style:none;flex-wrap:wrap}
+.fe-proposal summary::-webkit-details-marker{display:none}
+.fe-proposal__title{font-size:12px;font-weight:700;flex:1;min-width:210px}
+.fe-proposal__kind{font-size:11px;background:#e5edf8;color:#47668e;border:1px solid #d3e0f1;border-radius:5px;padding:4px 7px;font-weight:750}
+.fe-proposal__kind--message{background:#f1eafa;color:#745b99;border-color:#e3d6f3}
+.fe-proposal__state{font-size:10px;color:#856a42;background:#fff4df;padding:3px 7px;border-radius:5px}
+.fe-proposal__body{font-size:11.5px;line-height:1.65;padding:2px 6px 13px;color:#575f6c}
+.fe-proposal__body p{margin:9px 0}
+.fe-proposal__note{color:#765e3d}
+.fe-proposal__message{white-space:pre-wrap;background:#f8f6fa;border-radius:7px;padding:12px;line-height:1.65}
