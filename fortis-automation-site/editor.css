@@ -76,3 +76,11 @@
 .fe-dialog .fe-checkbox.fe-call-choice{display:flex;flex-direction:row;align-items:center;gap:8px;font-size:12px;line-height:1.5;font-weight:700;background:#fdf0f0;border:1px solid #edd0d0;padding:10px;border-radius:8px}
 .fe-dialog .fe-checkbox.fe-call-choice input{width:18px;height:18px;flex:0 0 18px;accent-color:#b93440}
 .fe-dialog .fe-checkbox.fe-call-choice[hidden]{display:none}
+
+/* Только метка рядом с ID, без красной заливки карточки */
+.rule .rfoot .fe-disabled-label {
+  color:#a33d3d;
+  font-size:10px;
+  font-weight:800;
+  white-space:nowrap;
+}

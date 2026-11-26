@@ -89,6 +89,31 @@
       : /(?:^|[;,.])\s*Важная(?=\s*(?:$|[;,.]))/i.test(evidence);
     badge.classList.toggle('fe-priority-important',important);
   }
+  function updateDisabledMarker(card) {
+    var foot=q('summary .rfoot',card);
+    if(!foot)return;
+    var statusFields=parseFields(card).filter(function(f){
+      return /^(?:Статус|Статус автодействия|Состояние)$/i.test(f.label);
+    });
+    var isOff=statusFields.some(function(f){
+      return /^(?:ВЫКЛ|ВЫКЛЮЧЕНО|ОТКЛЮЧЕНО|НЕАКТИВНО|DISABLED|INACTIVE|OFF|FALSE)(?=$|[\s(:;,.])/i.test(f.value.trim());
+    });
+    var badges=all('.fe-disabled-label',foot);
+    if(!isOff) {
+      badges.forEach(function(e){e.remove();});
+      return;
+    }
+    var badge=badges.shift();
+    badges.forEach(function(e){e.remove();});
+    if(!badge){
+      badge=document.createElement('span');
+      badge.className='fe-disabled-label';
+    }
+    badge.textContent='ОТКЛЮЧЕНО';
+    var id=q('.id',foot);
+    if(id && id.nextElementSibling!==badge)id.insertAdjacentElement('afterend',badge);
+    else if(!badge.isConnected)foot.appendChild(badge);
+  }
   function parseWarnings(card) {
     var detail = q('.details',card);
     return detail ? all(':scope > .warn',detail).map(function (n) { return n.textContent.trim(); }).filter(Boolean).join('\n\n') : '';
@@ -377,7 +402,7 @@
     Object.keys(source.cards).forEach(function(id){applyCard(id,source.cards[id]);});
     Object.keys(draft.stages).forEach(function(id){applyStage(id,draft.stages[id]);});
     Object.keys(draft.cards).forEach(function(id){applyCard(id,draft.cards[id]);});
-    sortStacks();all('details.rule.staff-task').forEach(setTaskPriorityMarker);addEditButtons();countCards();updateStatus();
+    sortStacks();all('details.rule').forEach(updateDisabledMarker);all('details.rule.staff-task').forEach(setTaskPriorityMarker);addEditButtons();countCards();updateStatus();
   }
   function onSubmit(e) {
     e.preventDefault();
