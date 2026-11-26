@@ -128,3 +128,13 @@
 .fe-proposal__body p{margin:9px 0}
 .fe-proposal__note{color:#765e3d}
 .fe-proposal__message{white-space:pre-wrap;background:#f8f6fa;border-radius:7px;padding:12px;line-height:1.65}
+
+/* Редактирование всей страницы: текст и карточки без числового ID Fitbase. */
+.fe-site-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fe-site-fields label{font-size:12px;font-weight:700}
+.fe-site-fields textarea,.fe-site-fields input{display:block;margin-top:5px;width:100%;border:1px solid #dad9d7;border-radius:7px;padding:9px;background:#fff;color:#575f6c;line-height:1.5;resize:vertical;font:inherit}
+.fe-site-fields label:has(textarea){grid-column:1/-1}
+.fe-id-help{display:block;font-size:10px;color:#857265;margin-top:5px;line-height:1.5}
+.fe-id-help[hidden]{display:none}
+.source,.provenance,.sub,.foot{white-space:pre-line}
+@media(max-width:600px){.fe-site-fields{grid-template-columns:1fr}.fe-site-fields label:has(textarea){grid-column:auto}}

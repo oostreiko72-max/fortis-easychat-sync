@@ -6,8 +6,18 @@
   var ADMIN_API = 'https://fortis-fitbase-admin-api.onrender.com';
   var TYPES = ['Воронка','Задача','Сообщение','Начисление бонусов','Push','Тег','Заявка'];
   var STYLES = {'Воронка':['funnel','⑂'],'Задача':['task','☷'],'Сообщение':['message','◌'],'Начисление бонусов':['bonus','✦'],'Push':['push','♧'],'Тег':['tag','⌑'],'Заявка':['lead','＋']};
-  var source = {cards:{},stages:{}};
-  var draft = {cards:{},stages:{}};
+  var source = {cards:{},stages:{},site:{}};
+  var draft = {cards:{},stages:{},site:{}};
+  var SITE_FIELDS = [
+    {key:'brand',label:'Название студии в шапке',selector:'.brand',mode:'prefix'},
+    {key:'brandSuffix',label:'Подпись рядом с названием',selector:'.brand span'},
+    {key:'source',label:'Дата и источник в шапке',selector:'.source',multiline:true},
+    {key:'heading',label:'Заголовок страницы',selector:'main h1'},
+    {key:'subtitle',label:'Подзаголовок',selector:'main .sub',multiline:true},
+    {key:'provenance',label:'Примечание об источнике данных',selector:'.provenance',multiline:true},
+    {key:'globalTab',label:'Название раздела глобальных автодействий',selector:'#nav [data-tab="Г"]',mode:'prefix'},
+    {key:'footer',label:'Пояснение внизу страницы',selector:'.foot',multiline:true}
+  ];
   var editing = false;
   var mode = null;
   var editingId = null;
@@ -23,6 +33,7 @@
       && x.stages && typeof x.stages === 'object' && !Array.isArray(x.stages);
   }
   function cardId(card) {
+    if(card && card.hasAttribute('data-fe-unverified-id'))return card.getAttribute('data-fe-id')||'site-g31';
     var href = q('.link[href*="/automatic/update?id="]',card);
     var match = href && href.getAttribute('href').match(/[?&]id=(\d+)/);
     return match ? match[1] : (card.getAttribute('data-fe-id') || null);
@@ -46,7 +57,9 @@
     });
   }
   function options(selected) {
-    var a = stagesList().concat([{id:'Г', title:'Глобальные / Общие'}]);
+    var global=q('#nav [data-tab="Г"]');
+    var globalName=global&&global.firstChild?global.firstChild.textContent.trim():'Глобальные / Общие';
+    var a = stagesList().concat([{id:'Г', title:globalName}]);
     return a.map(function (x) {
       return '<option value="' + esc(x.id) + '"' + (selected===x.id?' selected':'') + '>' + esc(x.id + ' — ' + x.title) + '</option>';
     }).join('');
@@ -312,8 +325,27 @@
   function merged() {
     return {
       cards:Object.assign({},source.cards,draft.cards),
-      stages:Object.assign({},source.stages,draft.stages)
+      stages:Object.assign({},source.stages,draft.stages),
+      site:Object.assign({},source.site||{},draft.site||{})
     };
+  }
+  function getSiteValue(f) {
+    var el=q(f.selector);if(!el)return '';
+    if(f.mode==='prefix')return el.firstChild?el.firstChild.textContent.trim():'';
+    return (el.innerText||el.textContent||'').trim();
+  }
+  function applySite(data) {
+    if(!data||typeof data!=='object')return;
+    SITE_FIELDS.forEach(function(f){
+      if(!Object.prototype.hasOwnProperty.call(data,f.key))return;
+      var el=q(f.selector);if(!el)return;
+      var value=String(data[f.key]==null?'':data[f.key]);
+      if(f.mode==='prefix'){
+        var first=el.firstChild;
+        if(first&&first.nodeType===3)first.nodeValue=value+' ';
+        else el.insertBefore(document.createTextNode(value+' '),first||null);
+      }else el.textContent=value;
+    });
   }
   function addFieldRow(data) {
     data = data || {label:'Новое поле',value:'',body:false};
@@ -336,6 +368,7 @@
       '<div class="fe-toolbar__left">'
       + '<button type="button" class="fe-primary" data-fe-action="toggle">✎ Редактировать</button>'
       + '<button type="button" data-fe-action="new-card">＋ Новая карточка</button>'
+      + '<button type="button" data-fe-action="site">✎ Тексты страницы</button>'
       + '<button type="button" data-fe-action="export-json">↓ Резервная копия JSON</button>'
       + '<button type="button" data-fe-action="import-json">↑ Импорт изменений</button>'
       + '</div>'
@@ -364,7 +397,7 @@
      + '<button type="button" class="fe-headclose" data-fe-action="close" aria-label="Закрыть">×</button></div>'
      + '<div class="fe-dialog__content">'
      + '<div id="fe-card-area"><div class="fe-grid">'
-     + '<label>ID Fitbase<input id="fe-id" type="number" min="1" step="1" required></label>'
+     + '<label>ID Fitbase<input id="fe-id" type="number" min="1" step="1" required><small id="fe-no-id-help" class="fe-id-help" hidden>ID в Fitbase неизвестен, используется внутренний ключ сайта. Это не меняет CRM.</small></label>'
      + '<label>Номер на карточке<input id="fe-code" required maxlength="40" placeholder="1.1.2 или Г-27"></label>'
      + '<label class="fe-wide">Название автодействия<input id="fe-card-title" required maxlength="250"></label>'
      + '<label>Тип действия<select id="fe-type"></select></label>'
@@ -381,6 +414,8 @@
      + '<label class="fe-wide">Задача администратора<textarea id="fe-duty" rows="3"></textarea></label>'
      + '<label>Цвет этапа<input id="fe-color" type="color" value="#b8aea9"></label></div>'
      + '<p class="fe-note">Название, цель и цвет изменяются только на сайте, а не в CRM.</p></div>'
+     + '<div id="fe-site-area" hidden><h3 class="fe-subtitle">Тексты всей страницы</h3><div id="fe-site-fields" class="fe-site-fields"></div>'
+     + '<p class="fe-note">Шапка, заголовки, пояснения и название глобального раздела меняются здесь. Все карточки, включая Г-31, открываются кнопкой ✎ на карточке.</p></div>'
      + '</div>'
      + '<div class="fe-dialog__footer"><button type="button" data-fe-action="close">Отмена</button><button class="fe-save" type="submit">Сохранить в браузере</button></div>'
      + '</form>';
@@ -402,10 +437,10 @@
     setTimeout(function(){e.remove();},3600);
   }
   function updateStatus() {
-    var count = Object.keys(draft.cards).length + Object.keys(draft.stages).length;
+    var count = Object.keys(draft.cards).length + Object.keys(draft.stages).length + Object.keys(draft.site||{}).length;
     var el=q('#fe-status');
     if (el) el.innerHTML = '<strong>Черновик: '+count+' изменений.</strong> '
-      +'Только в этом браузере, пока вы не опубликуете скачанный HTML. ';
+      +'Только в этом браузере до нажатия «Сохранить и опубликовать». ';
   }
   function setEditing(value) {
     editing = !!value;
@@ -429,7 +464,7 @@
     all('details.rule').forEach(function (c) {
       var id=cardId(c);
       if(id)c.setAttribute('data-fe-id',id);
-      if(c.hasAttribute('data-fe-unverified-id'))return;
+      // Card without a confirmed CRM ID is still editable using its site key.
       var summary=q('summary',c);
       if(summary&&!q('.fe-edit-card',summary)){
         var btn=document.createElement('button');
@@ -441,12 +476,15 @@
   }
   function openCard(card, isNew) {
     mode='card';editingId=isNew?null:cardId(card);
-    q('#fe-card-area').hidden=false;q('#fe-stage-area').hidden=true;
+    q('#fe-card-area').hidden=false;q('#fe-stage-area').hidden=true;q('#fe-site-area').hidden=true;
     var data=isNew?{id:'',code:'',title:'',kind:'Задача',stage:'1.1',
       fields:[{label:'Триггер',value:'',body:false},{label:'Условия',value:'',body:false},{label:'Действие',value:'',body:false},{label:'Полный текст задачи / сообщения',value:'',body:true}],
       notes:'Добавлено вручную на сайт; точные параметры необходимо сверить в Fitbase.',created:true}:readCard(card);
-    q('#fe-title').textContent=isNew?'Новая карточка':'Карточка ID '+data.id;
-    q('#fe-id').disabled=!isNew;q('#fe-id').value=data.id||'';
+    var siteOnly=String(data.id||'').startsWith('site-');
+    q('#fe-title').textContent=isNew?'Новая карточка':(siteOnly?'Карточка '+data.code+' — ID в Fitbase не указан':'Карточка ID '+data.id);
+    q('#fe-id').disabled=!isNew||siteOnly;q('#fe-id').required=isNew;
+    q('#fe-id').value=siteOnly?'':(data.id||'');
+    q('#fe-no-id-help').hidden=!siteOnly;
     q('#fe-code').value=data.code;q('#fe-card-title').value=data.title;
     q('#fe-type').value=TYPES.indexOf(data.kind)>=0?data.kind:'Задача';
     q('#fe-call').checked=!!data.isCall;
@@ -461,20 +499,38 @@
   function openStage(stage) {
     var data=stageData(stage);
     mode='stage';editingId=data.id;
-    q('#fe-card-area').hidden=true;q('#fe-stage-area').hidden=false;
+    q('#fe-card-area').hidden=true;q('#fe-stage-area').hidden=false;q('#fe-site-area').hidden=true;
     q('#fe-title').textContent='Этап '+data.id;
     q('#fe-stage-title').value=data.title;
     q('#fe-goal').value=data.goal;q('#fe-duty').value=data.duty;
     q('#fe-color').value=sanitizeColor(data.color);
     modal.showModal();
   }
+  function openSite() {
+    mode='site';editingId=null;
+    q('#fe-card-area').hidden=true;q('#fe-stage-area').hidden=true;q('#fe-site-area').hidden=false;
+    q('#fe-title').textContent='Редактирование всей страницы';
+    var panel=q('#fe-site-fields');panel.innerHTML='';
+    var saved=Object.assign({},source.site||{},draft.site||{});
+    SITE_FIELDS.forEach(function(f){
+      var label=document.createElement('label');label.textContent=f.label;
+      var input=document.createElement(f.multiline?'textarea':'input');
+      input.id='fe-site-'+f.key;
+      if(f.multiline)input.rows=f.key==='provenance'?5:3;
+      else input.type='text';
+      input.value=Object.prototype.hasOwnProperty.call(saved,f.key)?String(saved[f.key]):getSiteValue(f);
+      label.appendChild(input);panel.appendChild(label);
+    });
+    modal.showModal();
+  }
   function buildCard(id) {
-    var c=document.createElement('details');
+    var c=document.createElement('details'),siteOnly=String(id).startsWith('site-');
     c.className='rule';c.setAttribute('data-fe-id',id);
     c.setAttribute('data-fe-created','true');
+    if(siteOnly)c.setAttribute('data-fe-unverified-id','true');
     c.innerHTML = '<summary><span class="seq"></span><span class="main"><span class="rname"></span>'
-       + '<span class="rfoot"><span class="kind task">☷ Задача</span><span class="id">ID '+esc(id)+'</span></span></span><span class="chev">⌄</span></summary>'
-       + '<div class="details"><a class="link" href="https://j50552.fitbase.io/AutomaticAction/automatic/update?id='+esc(id)+'" target="_blank" rel="noopener noreferrer">Открыть в Fitbase ↗</a></div>';
+       + '<span class="rfoot"><span class="kind task">☷ Задача</span><span class="id">'+(siteOnly?'ID Fitbase не указан':'ID '+esc(id))+'</span></span></span><span class="chev">⌄</span></summary>'
+       + '<div class="details">'+(siteOnly?'':'<a class="link" href="https://j50552.fitbase.io/AutomaticAction/automatic/update?id='+esc(id)+'" target="_blank" rel="noopener noreferrer">Открыть в Fitbase ↗</a>')+'</div>';
     return c;
   }
   function locationElement(value) {
@@ -486,6 +542,9 @@
     if(String(id)==='162')return; // Action «Постоянные» no longer exists in Fitbase.
     if(!data || typeof data!=='object')return;
     var card=cardById(id)||buildCard(id);
+    var siteOnly=String(id).startsWith('site-');
+    if(siteOnly)card.setAttribute('data-fe-unverified-id','true');
+    card.setAttribute('data-fe-id',String(id));
     var loc=(/^Г\s*[-–]/i.test(data.code||''))?'Г':(data.stage||'Г');
     var destination=locationElement(loc)||locationElement('Г');
     if(!destination)return;
@@ -501,6 +560,8 @@
     var badge=q('.kind',card);
     if(badge){badge.className='kind '+(isCall?'phone':STYLES[type][0]);badge.textContent=isCall?'☎ Звонок':STYLES[type][1]+' '+type;}
     if(data.created)card.setAttribute('data-fe-created','true');
+    var visibleId=q('summary .id',card);
+    if(visibleId&&siteOnly)visibleId.textContent='ID Fitbase не указан';
     var fields=Array.isArray(data.fields)?data.fields:[];
     if(type==='Воронка')fields=fields.filter(function(f){return !f||!isFunnelOnlyTextField(f.label);});
     var html=fields.filter(function(f){return f && String(f.label||'').trim()}).map(function (f){
@@ -510,7 +571,7 @@
     }).join('');
     var notes=String(data.notes||'').trim();
     if(notes)html+=notes.split(/\n\s*\n/).map(function (n){return '<div class="warn">'+esc(n)+'</div>';}).join('');
-    html+='<a class="link" href="https://j50552.fitbase.io/AutomaticAction/automatic/update?id='+esc(id)+'" target="_blank" rel="noopener noreferrer">Открыть в Fitbase ↗</a>';
+    if(!siteOnly)html+='<a class="link" href="https://j50552.fitbase.io/AutomaticAction/automatic/update?id='+esc(id)+'" target="_blank" rel="noopener noreferrer">Открыть в Fitbase ↗</a>';
     var details=q('.details',card);
     if(details)details.innerHTML=html;
     var search=[id,data.code,data.title,type,notes].concat(fields.map(function(f){return f.label+' '+f.value;})).join(' ').toLowerCase();
@@ -557,6 +618,7 @@
     if(search)search.dispatchEvent(new Event('input',{bubbles:true}));
   }
   function applyAll() {
+    applySite(Object.assign({},source.site||{},draft.site||{}));
     Object.keys(source.stages).forEach(function(id){applyStage(id,source.stages[id]);});
     Object.keys(source.cards).forEach(function(id){applyCard(id,source.cards[id]);});
     Object.keys(draft.stages).forEach(function(id){applyStage(id,draft.stages[id]);});
@@ -565,14 +627,19 @@
   }
   function onSubmit(e) {
     e.preventDefault();
-    if(mode==='stage'){
+    if(mode==='site'){
+      var settings={};
+      SITE_FIELDS.forEach(function(f){var el=q('#fe-site-'+f.key);if(el)settings[f.key]=el.value;});
+      draft.site=settings;
+    }else if(mode==='stage'){
       var data={id:editingId,title:q('#fe-stage-title').value.trim(),goal:q('#fe-goal').value.trim(),
         duty:q('#fe-duty').value.trim(),color:sanitizeColor(q('#fe-color').value)};
       if(!data.title){alert('Укажите название этапа.');return;}
       draft.stages[editingId]=data;
     }else{
       var id=editingId||q('#fe-id').value.trim();
-      if(!/^\d+$/.test(id)||+id<1){alert('Укажите числовой ID автодействия в Fitbase.');return;}
+      if(!editingId&&(!/^\d+$/.test(id)||+id<1)){alert('Укажите числовой ID автодействия в Fitbase.');return;}
+      if(editingId&&!/^(?:\d+|site-[a-z0-9-]+)$/.test(id)){alert('Некорректный ID карточки.');return;}
       if(!editingId&&cardById(id)){alert('Карточка с таким ID уже существует. Откройте её для редактирования.');return;}
       var code=q('#fe-code').value.trim(),title=q('#fe-card-title').value.trim();
       if(!title||!code){alert('Укажите номер и название карточки.');return;}
@@ -588,7 +655,7 @@
     if(!saveDraft())return;
     applyAll();
     modal.close();
-    toast('Сохранено в вашем браузере. Для публикации скачайте сайт HTML.');
+    toast('Изменения сохранены в браузере. Для общей публикации нажмите «Сохранить и опубликовать».');
   }
   function download(name,body,type) {
     var blob=new Blob([body],{type:type});
@@ -685,6 +752,7 @@
         var key=btn.getAttribute('data-fe-action');
         if(key==='toggle')setEditing(!editing);
         else if(key==='new-card'){setEditing(true);openCard(null,true);}
+        else if(key==='site'){setEditing(true);openSite();}
         else if(key==='close')modal.close();
         else if(key==='add-field')addFieldRow();
         else if(key==='remove-field'){btn.closest('.fe-fieldrow')?.remove();}

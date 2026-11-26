@@ -152,7 +152,8 @@ const server = http.createServer(async (req, res) => {
     }
     const lower = html.slice(0, 1000).toLowerCase();
     if (!lower.includes('<!doctype html') || !html.includes('id="fortis-editor-published"')
-      || !html.includes('data-view="1"') || !html.includes('Воронки и автодействия')) {
+      || !html.includes('data-view="1"') || !html.includes('id="nav"')
+      || !/<main(?:\s|>)/i.test(html) || !/<h1(?:\s|>)/i.test(html)) {
       return json(res, 400, { error: 'Файл не прошёл проверку структуры карты Fortis.' }, origin);
     }
 
