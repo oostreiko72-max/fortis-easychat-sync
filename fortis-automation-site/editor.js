@@ -96,7 +96,7 @@
       return /^(?:Статус|Статус автодействия|Состояние)$/i.test(f.label);
     });
     var isOff=statusFields.some(function(f){
-      return /^(?:ВЫКЛ|ВЫКЛЮЧЕНО|ОТКЛЮЧЕНО|НЕАКТИВНО|DISABLED|INACTIVE|OFF|FALSE)(?=$|[\s(:;,.])/i.test(f.value.trim());
+      return /^(?:Выключено|Отключено|ВЫКЛ|ВЫКЛЮЧЕНО|ОТКЛЮЧЕНО|НЕАКТИВНО|DISABLED|INACTIVE|OFF|FALSE)(?=$|[\s(:;,.])/i.test(f.value.trim());
     });
     var badges=all('.fe-disabled-label',foot);
     if(!isOff) {
@@ -142,6 +142,23 @@
   function isFunnelOnlyTextField(label) {
     return /^(?:Текст задачи\s*\/\s*сообщения|Текст сообщения|Текст задачи|Полный текст задачи\s*\/\s*сообщения)$/i.test(String(label||'').trim());
   }
+  // Compact only subscriptions selected in the group-category folder. Service filters stay unchanged.
+  function compactSubscriptionCondition(value) {
+    var s=String(value||'');
+    s=s.replace(/(?:Клубная карта \(абонемент\)|Абонемент):\s*Групповые занятия \(и все подкатегории\):[\s\S]*?(?=\n(?:Тип абонемента:|Осталось посещений:|Прочие фильтры не заданы)|$)/g,'Абонемент: Групповые абонементы');
+    s=s.replace(/Абонемент:\s*\[множественный выбор[^\]]*\]/g,'Абонемент: Групповые абонементы');
+    s=s.replace(/^Абонемент:\s*Абонемент 12 тренировок,[^\n]*/gm,'Абонемент: Групповые абонементы');
+    s=s.replace(/^Абонемент:\s*Клубная карта, Студийная карта, Корпоративная карта[^\n]*/gm,'Абонемент: Групповые абонементы, студийные и корпоративные абонементы');
+    return s;
+  }
+  function correctReviewedStatus(card,value) {
+    // Respect a newly-entered definite status; upgrade only an older unknown value.
+    if(String(value||'').trim()!=='Требует проверки')return value;
+    var id=cardId(card);
+    if(id==='289')return 'Активно'; // 2.2.3
+    if(id==='287')return 'Выключено'; // 2.1.13
+    return value;
+  }
   function tidyCardDetails(card) {
     var details=q('.details',card);
     if(!details)return;
@@ -153,9 +170,13 @@
       var values=Array.prototype.filter.call(field.children,function(n){return n.nodeType===1&&!n.classList.contains('key');});
       if(label==='Статус') {
         field.classList.add('fe-status-field');
-        if(values.length)values[0].textContent=formatStatusLabel(values[0].textContent);
+        if(values.length)values[0].textContent=correctReviewedStatus(card,formatStatusLabel(values[0].textContent));
       } else {
         values.forEach(cleanTextNodes);
+        if(label==='Условия'&&values.length) {
+          var concise=compactSubscriptionCondition(values[0].textContent);
+          if(concise!==values[0].textContent)values[0].textContent=concise;
+        }
       }
     });
     all(':scope > .warn',details).forEach(cleanTextNodes);
