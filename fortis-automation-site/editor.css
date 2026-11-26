@@ -1,0 +1,49 @@
+/* ФОРТИС • редактор (изменения локальны до публикации через GitHub) */
+.fe-toolbar{margin:0 0 15px;padding:12px;background:#fff;border:1px solid #dad9d7;border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.fe-toolbar__left,.fe-toolbar__right{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.fe-toolbar button,.fe-toolbar a{border:1px solid #dad9d7;background:#fff;border-radius:7px;padding:9px 12px;text-decoration:none;color:#575f6c;font-weight:720;font-size:11px;white-space:nowrap}
+.fe-toolbar button:hover,.fe-toolbar a:hover{background:#f6f5f3}
+.fe-toolbar .fe-primary{background:#575f6c;border-color:#575f6c;color:white}
+.fe-toolbar .fe-primary:hover{background:#444d5a}
+.fe-toolbar .fe-warn{color:#946b46}
+.fe-toolbar .fe-status{font-size:11px;color:#7a7d83;max-width:470px;line-height:1.5}
+.fe-toolbar .fe-status strong{color:#575f6c}
+.fe-hint{font-size:11px;color:#7a7d83;margin:-5px 0 14px}
+.fe-edit-card,.fe-edit-stage{display:none!important;border:1px solid #b8aea9!important;border-radius:5px!important;color:#575f6c!important;background:#f8f6f4!important;font-size:10px!important;font-weight:750!important;padding:3px 7px!important;line-height:1.3!important;white-space:nowrap}
+.fe-on .fe-edit-card,.fe-on .fe-edit-stage{display:inline-flex!important;align-items:center}
+.fe-on .rule{outline:1px dashed rgba(184,174,169,.55)}
+.fe-on .stage-head{position:relative}
+.fe-edit-stage{float:right;margin-top:-2px}
+.fe-on .rule summary{align-items:flex-start}
+.fe-edit-card{align-self:flex-start;flex:none}
+.fe-on .rule summary .chev{display:none}
+.fe-dialog{color:#575f6c;border:1px solid #d6d3d0;background:#fff;border-radius:14px;width:min(820px,calc(100vw - 24px));max-height:min(90vh,900px);padding:0;box-shadow:0 22px 70px rgba(35,37,42,.23);font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.fe-dialog::backdrop{background:rgba(36,42,50,.51)}
+.fe-dialog *{box-sizing:border-box}
+.fe-dialog__header{padding:17px 20px;border-bottom:1px solid #e7e4e2;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fe-dialog__header h2{margin:0;font-size:19px}
+.fe-dialog__header p{color:#81838a;font-size:11px;margin:3px 0 0}
+.fe-dialog__content{padding:16px 20px 10px;max-height:calc(90vh - 180px);overflow:auto;overscroll-behavior:contain}
+.fe-dialog__footer{padding:12px 20px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid #e7e4e2;background:#faf9f8;position:sticky;bottom:0}
+.fe-dialog label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:730;color:#676e75}
+.fe-dialog input,.fe-dialog select,.fe-dialog textarea{display:block;width:100%;min-width:0;padding:9px 11px;background:#fff;border:1px solid #d6d5d2;border-radius:7px;color:#575f6c;font:12px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.fe-dialog input:focus,.fe-dialog textarea:focus,.fe-dialog select:focus{outline:2px solid #b8aea9;outline-offset:1px}
+.fe-dialog textarea{resize:vertical;min-height:62px}
+.fe-dialog input[type=color]{width:80px;height:40px;padding:3px}
+.fe-dialog input:disabled{background:#f3f3f2;color:#8e8e8e}
+.fe-dialog .fe-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:13px}
+.fe-dialog .fe-grid .fe-wide{grid-column:1/-1}
+.fe-dialog .fe-subtitle{font-size:13px;font-weight:800;margin:10px 0 8px}
+.fe-fieldrow{display:grid;grid-template-columns:minmax(155px,32%) 1fr auto;gap:8px;align-items:start;padding:9px;border:1px solid #e9e7e5;border-radius:8px;margin-bottom:7px;background:#fbfbfa}
+.fe-fieldrow textarea{min-height:54px}
+.fe-fieldrow .fe-remove{border:0;background:#f0eeee;color:#8c6257;padding:8px 11px;border-radius:6px;margin-top:20px}
+.fe-fieldrow .fe-checkbox{flex-direction:row;align-items:center;gap:6px;margin-top:5px;font-size:10px;font-weight:500}
+.fe-fieldrow input[type=checkbox]{width:auto}
+.fe-dialog button{cursor:pointer;border:1px solid #ddd9d6;border-radius:7px;background:#fff;color:#575f6c;padding:9px 12px;font-size:12px;font-weight:700}
+.fe-dialog button.fe-save{background:#575f6c;color:white;border-color:#575f6c}
+.fe-dialog .fe-add-field{border-style:dashed;width:100%;margin:4px 0 13px}
+.fe-dialog .fe-note{font-size:11px;color:#807d7a;line-height:1.6;padding:10px 12px;background:#f7f5f2;border-radius:7px;margin:10px 0}
+.fe-dialog .fe-headclose{border:0;font-size:21px;line-height:1;padding:3px 7px}
+.fe-dialog #fe-notes{min-height:75px}
+.fe-flash{position:fixed;z-index:99999;bottom:20px;right:20px;max-width:min(410px,calc(100vw - 32px));border-radius:10px;background:#575f6c;color:#fff;padding:12px 16px;box-shadow:0 6px 24px rgba(0,0,0,.17);font-size:12px;line-height:1.5}
+@media(max-width:640px){.fe-toolbar{padding:10px}.fe-toolbar__left,.fe-toolbar__right{width:100%}.fe-toolbar button,.fe-toolbar a{flex:1}.fe-dialog__content{padding:13px 13px 6px}.fe-dialog__header{padding:14px}.fe-dialog__footer{padding:10px}.fe-dialog .fe-grid{grid-template-columns:1fr}.fe-fieldrow{grid-template-columns:1fr auto}.fe-fieldrow .fe-key{grid-column:1/-1}.fe-fieldrow .fe-value{grid-column:1}.fe-fieldrow .fe-remove{grid-column:2;margin:0}}
