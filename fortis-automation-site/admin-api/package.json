@@ -1,0 +1,12 @@
+{
+  "name": "fortis-fitbase-admin-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Authenticated publisher for the Fortis Fitbase staff map",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}
