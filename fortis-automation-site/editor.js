@@ -3,6 +3,7 @@
   var STORAGE = 'fortis.staff.editor.v1';
   var FORMAT = 'fortis.staff.edits.v1';
   var UPLOAD_URL = 'https://github.com/oostreiko72-max/fortis-easychat-sync/upload/fortis-automation-map-site/fortis-automation-site';
+  var ADMIN_API = 'https://fortis-fitbase-admin-api.onrender.com';
   var TYPES = ['Воронка','Задача','Сообщение','Начисление бонусов','Push','Тег','Заявка'];
   var STYLES = {'Воронка':['funnel','⑂'],'Задача':['task','☷'],'Сообщение':['message','◌'],'Начисление бонусов':['bonus','✦'],'Push':['push','♧'],'Тег':['tag','⌑'],'Заявка':['lead','＋']};
   var source = {cards:{},stages:{}};
@@ -137,6 +138,7 @@
       + '<button type="button" data-fe-action="import-json">↑ Импорт изменений</button>'
       + '</div>'
       + '<div class="fe-toolbar__right">'
+      + '<button type="button" class="fe-primary" data-fe-action="publish">✓ Сохранить и опубликовать</button>'
       + '<button type="button" data-fe-action="export-html">↓ Скачать сайт HTML</button>'
       + '<a target="_blank" rel="noopener noreferrer" href="' + UPLOAD_URL + '">Опубликовать через GitHub ↗</a>'
       + '<button type="button" class="fe-warn" data-fe-action="reset">Сбросить черновик</button>'
@@ -148,7 +150,7 @@
     else q('main')?.insertBefore(bar,q('main').firstChild);
     var hint = document.createElement('p');
     hint.className='fe-hint';
-    hint.textContent='Правки сохраняются в вашем браузере. Чтобы их увидели сотрудники, скачайте HTML и замените staff.html в GitHub. Действия в самой Fitbase не изменяются.';
+    hint.textContent='Правки сначала сохраняются только в вашем браузере. Кнопка «Сохранить и опубликовать» отправит их в GitHub через защищённый сервер, после чего Render обновит сайт. Публикация не меняет Fitbase.';
     bar.insertAdjacentElement('afterend',hint);
 
     modal = document.createElement('dialog');
@@ -388,7 +390,7 @@
     download('fortis_staff_changes.json',JSON.stringify(data,null,2),'application/json;charset=utf-8');
     toast('Резервная копия JSON скачана.');
   }
-  function exportHTML() {
+  function generateHTML() {
     var full=merged();
     var clone=document.documentElement.cloneNode(true);
     all('#fe-toolbar,.fe-hint,#fe-dialog,.fe-flash,.fe-edit-card,.fe-edit-stage',clone).forEach(function(n){n.remove();});
@@ -397,14 +399,55 @@
     all('details.rule',clone).forEach(function(c){c.hidden=false;c.open=false;});
     all('#nav button[data-tab]',clone).forEach(function(b){b.classList.toggle('active',b.getAttribute('data-tab')==='1');});
     var publish=clone.querySelector('#fortis-editor-published');
-    if(!publish){publish=document.createElement('script');publish.id='fortis-editor-published';publish.type='application/json';clone.querySelector('body')?.appendChild(publish);}
+    if(!publish){
+      publish=document.createElement('script');
+      publish.id='fortis-editor-published';publish.type='application/json';
+      clone.querySelector('body')?.appendChild(publish);
+    }
     publish.textContent=safeJSON(full);
     var info=clone.querySelector('#info');
     if(info)info.textContent='Этапы CRM расположены горизонтально. Нажмите на карточку для подробностей.';
-    download('staff.html','<!doctype html>\n'+clone.outerHTML,'text/html;charset=utf-8');
-    toast('Скачан staff.html. Загрузите его вместо старого файла в GitHub — Render обновит сайт автоматически.');
+    return '<!doctype html>\n'+clone.outerHTML;
   }
-  async function importJSON(event) {
+  function exportHTML() {
+    download('staff.html',generateHTML(),'text/html;charset=utf-8');
+    toast('Скачан staff.html. Если автоматическая публикация недоступна, замените файл в GitHub вручную.');
+  }
+  async function publishChanges() {
+    if(modal && modal.open) {
+      alert('Сначала сохраните изменения открытой карточки.');
+      return;
+    }
+    var password=window.prompt('Пароль администратора Фортис для публикации на сайте:');
+    if(password===null)return;
+    if(!password){alert('Пароль не указан.');return;}
+    var html=generateHTML();
+    if(!confirm('Опубликовать все текущие изменения сайта для сотрудников?\n\nИзменения в Fitbase НЕ вносятся.'))return;
+    var button=q('[data-fe-action="publish"]');
+    if(button){button.disabled=true;button.textContent='Публикация…';}
+    try {
+      var response=await fetch(ADMIN_API+'/api/publish',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+password},
+        body:JSON.stringify({html:html})
+      });
+      var result={};
+      try{result=await response.json();}catch(e){}
+      if(!response.ok)throw new Error(result.error||('Сервер ответил '+response.status));
+      if(!result.ok)throw new Error('Сервер не подтвердил сохранение.');
+      toast('Опубликовано в GitHub. Обновление сайта запускается автоматически.');
+      var el=q('#fe-status');
+      if(el)el.innerHTML='<strong>Сохранено и отправлено на публикацию.</strong> Render обновляет сайт. Черновик сохранён в браузере как резервная копия.';
+    } catch (e) {
+      var message=e&&e.message?e.message:'Ошибка сети.';
+      alert('Не удалось опубликовать: '+message+'\n\nЧерновик остался у вас в браузере. Можно скачать HTML для ручной публикации.');
+      toast('Ошибка публикации. Локальные изменения сохранены.');
+    } finally {
+      password='';
+      if(button){button.disabled=false;button.textContent='✓ Сохранить и опубликовать';}
+    }
+  }
+    async function importJSON(event) {
     var file=event.target.files&&event.target.files[0];
     event.target.value='';
     if(!file)return;
@@ -436,6 +479,7 @@
         else if(key==='export-json')exportJSON();
         else if(key==='import-json')q('#fe-file').click();
         else if(key==='export-html')exportHTML();
+        else if(key==='publish')publishChanges();
         else if(key==='reset')resetDraft();
         return;
       }
