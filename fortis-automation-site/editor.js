@@ -79,6 +79,7 @@
       code:q('.seq',card)?.textContent.trim() || '',
       title:q('.rname',card)?.textContent.trim() || '',
       kind:card.getAttribute('data-kind') || 'Задача',
+      isCall:card.classList.contains('staff-call'),
       stage:cardStage(card),
       fields:parseFields(card),
       notes:parseWarnings(card),
@@ -166,7 +167,8 @@
      + '<label>Номер на карточке<input id="fe-code" required maxlength="40" placeholder="1.1.2 или Г-27"></label>'
      + '<label class="fe-wide">Название автодействия<input id="fe-card-title" required maxlength="250"></label>'
      + '<label>Тип действия<select id="fe-type"></select></label>'
-     + '<label>Воронка / этап<select id="fe-location"></select></label></div>'
+     + '<label>Воронка / этап<select id="fe-location"></select></label>'
+     + '<label class="fe-wide fe-checkbox fe-call-choice" id="fe-call-row"><input id="fe-call" type="checkbox"> ☎ Это задача на звонок — показывать «Звонок» на закрытой карточке с усиленной красной рамкой</label></div>'
      + '<h3 class="fe-subtitle">Поля карточки</h3>'
      + '<div id="fe-fields"></div>'
      + '<button type="button" class="fe-add-field" data-fe-action="add-field">＋ Добавить поле</button>'
@@ -245,6 +247,8 @@
     q('#fe-id').disabled=!isNew;q('#fe-id').value=data.id||'';
     q('#fe-code').value=data.code;q('#fe-card-title').value=data.title;
     q('#fe-type').value=TYPES.indexOf(data.kind)>=0?data.kind:'Задача';
+    q('#fe-call').checked=!!data.isCall;
+    q('#fe-call-row').hidden=q('#fe-type').value!=='Задача';
     q('#fe-location').innerHTML=options(data.stage);
     q('#fe-location').value=data.stage;
     q('#fe-notes').value=data.notes||'';
@@ -287,8 +291,12 @@
     q('.rname',card).textContent=String(data.title||'Без названия');
     var type=TYPES.includes(data.kind)?data.kind:'Задача';
     card.setAttribute('data-kind',type);
+    var isCall=type==='Задача'&&(typeof data.isCall==='boolean'?data.isCall:card.classList.contains('staff-call'));
+    card.classList.toggle('staff-task',type==='Задача');
+    card.classList.toggle('staff-call',isCall);
+    card.setAttribute('data-activity',type==='Задача'?(isCall?'call':'task'):'');
     var badge=q('.kind',card);
-    if(badge){badge.className='kind '+STYLES[type][0];badge.textContent=STYLES[type][1]+' '+type;}
+    if(badge){badge.className='kind '+(isCall?'phone':STYLES[type][0]);badge.textContent=isCall?'☎ Звонок':STYLES[type][1]+' '+type;}
     if(data.created)card.setAttribute('data-fe-created','true');
     var fields=Array.isArray(data.fields)?data.fields:[];
     var html=fields.filter(function(f){return f && String(f.label||'').trim()}).map(function (f){
@@ -370,7 +378,7 @@
         return {label:q('.fe-field-label',r).value.trim(),value:q('.fe-field-value',r).value,
           body:q('.fe-field-body',r).checked};
       }).filter(function(f){return f.label;});
-      draft.cards[id]={id:id,code:code,title:title,kind:q('#fe-type').value,stage:dest,
+      draft.cards[id]={id:id,code:code,title:title,kind:q('#fe-type').value,isCall:q('#fe-type').value==='Задача'&&q('#fe-call').checked,stage:dest,
         fields:fields,notes:q('#fe-notes').value.trim(),created:!editingId || (cardById(id)?.getAttribute('data-fe-created')==='true')};
     }
     if(!saveDraft())return;
@@ -487,6 +495,10 @@
       if(cardBtn){e.preventDefault();e.stopPropagation();openCard(cardBtn.closest('details.rule'),false);return;}
       var stageBtn=e.target.closest('.fe-edit-stage');
       if(stageBtn){e.preventDefault();e.stopPropagation();openStage(stageBtn.closest('.stage'));return;}
+    });
+    q('#fe-type').addEventListener('change',function(){
+      q('#fe-call-row').hidden=this.value!=='Задача';
+      if(this.value!=='Задача')q('#fe-call').checked=false;
     });
     q('#fe-code').addEventListener('input',function(){
       if(/^Г\s*[-–]/i.test(this.value))q('#fe-location').value='Г';
