@@ -78,7 +78,7 @@
     }
     // Read only task-priority fields, never the task body or automation enabled state.
     var evidence=parseFields(card).filter(function(f){
-      return /^(?:Параметры(?: задачи)?|Переход\s*\/\s*результат|Статус задачи|Приоритет(?: задачи)?|Срочность)$/i.test(f.label);
+      return /^(?:Параметры(?: задачи)?|Настройки задачи|Переход\s*\/\s*результат|Статус задачи|Приоритет(?: задачи)?|Срочность)$/i.test(f.label);
     }).map(function(f){return f.value;}).join('; ');
     var statuses=[];
     var pattern=/(?:Статус(?: задачи)?|Приоритет(?: задачи)?|Срочность)\s*[:=]\s*(Важная|Обычная)(?=$|[\s;,.|])/gi;
@@ -129,6 +129,9 @@
     s=s.replace(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\s*\(([^()]*[А-Яа-яЁё][^()]*)\)/gi,function(_,title){return title;});
     s=s.replace(/\s*[\[(](?:[a-z][a-z0-9]*(?:_[a-z0-9]+)+(?:\s*[=:]\s*[^)\]]+)?|(?:value|id)\s*[=:]\s*[^)\]]+|enabled|unchecked|offset)\s*[\])]/gi,'');
     s=s.replace(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+(?:\s*=\s*(?:"|&quot;)?[a-z0-9]+(?:"|&quot;)?)?/gi,'');
+    s=s.replace(/\bfalse\b/gi,'Нет').replace(/\btrue\b/gi,'Да').replace(/\bunchecked\b/gi,'не отмечено').replace(/\bchecked\b/gi,'отмечено');
+    s=s.replace(/\b5\s*(?:[-—]\s*)?Задание\b|\bЗадание\s*\(5\)|\b5\s*\(Задание\)/gi,'Задание');
+    s=s.replace(/\b2\s*(?:[-—]\s*)?Звонок\b|\bЗвонок\s*\(2\)|\b2\s*\(Звонок\)/gi,'Звонок');
     s=s.replace(/^[ \t]*[—–-]\s*/gm,'').replace(/ {2,}/g,' ').replace(/ +([.,;])/g,'$1');
     placeholders.forEach(function(x){s=s.split(x[0]).join(x[1]);});
     return s;
@@ -167,9 +170,82 @@
     s=s.replace(/^Задержка:\s*0\s*\(\s*День в день\s*\)$/i,'День в день');
     return s.replace(/\s{2,}/g,' ').trim();
   }
+  function taskDataFromText(text,data) {
+    String(text||'').split(/\s*[;|]\s*|\.\s+(?=(?:Ответственн|Исполнитель|Тип|Статус|Срочность|Приоритет|Категория|Весь день|Срок|Перемещать|Задержка|Смещение|Выполнять|Срабатывать))|,\s+(?=(?:Ответственн|Исполнитель|Тип|Статус|Срочность|Приоритет|Категория|Весь день|Срок|Перемещать|Задержка|Смещение))/gi).forEach(function(part){
+      var m=part.trim().match(/^([^:]+):\s*([\s\S]*)$/);if(!m)return;
+      var k=m[1].trim().toLowerCase(),v=m[2].trim();
+      if(/^(ответственный|ответственные|исполнитель)$/.test(k)){
+        if(v&&!/^(?:нет|не указан|не задан|—|n\/a)$/i.test(v))data.executor=v.replace(/\.$/,'');
+      } else if(/^(?:тип задачи|тип|категория)$/.test(k)){
+        if(/звонок|звонко/i.test(v)||v==='2')data.type='Звонок';
+        else if(/задание/i.test(v)||v==='5')data.type='Задание';
+      } else if(/^(?:статус задачи|статус|приоритет(?: задачи)?|срочность)$/.test(k)){
+        if(/Важная/i.test(v))data.priority='Важная';
+        else if(/Обычная/i.test(v)&&data.priority!=='Важная')data.priority='Обычная';
+      } else if(k==='весь день'&&/^(?:true|да|checked|отмечено|включено)$/i.test(v))data.allDay=true;
+      else if(/^(?:срок|срок выполнения)$/.test(k)&&v&&!/^(?:не (?:задан|указан|установлен|подтверждено)|пусто|—|-|\(.*\)|00:00)$/i.test(v))data.deadline=v;
+      else if(k==='перемещать заявку'&&/^(?:да|true|вкл|включено|checked|1)$/i.test(v))data.move=true;
+    });
+    return data;
+  }
+  function readableTaskSettings(d) {
+    return [d.executor?'Исполнитель: '+d.executor:null,d.type?'Тип задачи: '+d.type:null,d.priority?'Приоритет: '+d.priority:null,
+      d.allDay?'На весь день':null,d.deadline?'Срок выполнения: '+d.deadline:null,
+      d.move?'Перемещать заявку после выполнения: Да':null].filter(Boolean).join('; ');
+  }
+  function normalizeTaskSettings(card,details) {
+    if(card.getAttribute('data-kind')!=='Задача')return;
+    var data={};
+    all(':scope > .field',details).forEach(function(f){
+      var label=parseName(f),v=Array.prototype.filter.call(f.children,function(x){return x.nodeType===1&&!x.classList.contains('key');}).map(function(x){return x.textContent||'';}).join(' ');
+      if(['Параметры','Параметры задачи','Переход / результат','Настройки задачи'].indexOf(label)<0)return;
+      if(/(?:^|[;|.,]\s*)(?:Ответственн(?:ый|ые)|Исполнитель|Тип задачи|Тип|Статус задачи|Статус|Приоритет(?: задачи)?|Срочность|Категория|Весь день|Срок(?: выполнения)?|Перемещать заявку|Задержка формирования|Смещение|Выполнять)\s*:/i.test(v)||label==='Настройки задачи'){
+        taskDataFromText(v,data);f.remove();
+      } else if(label==='Переход / результат'&&/^(?:N\/A|Н\/A|Нет|Напрямую \(не воронка\)|Не воронка \(создание задачи\)|Целевой этап\/воронка не заданы|\s*)$/i.test(v.trim()))f.remove();
+      else if((label==='Параметры'||label==='Параметры задачи')&&/^(?:N\/A|Н\/A|Нет|\s*)$/i.test(v.trim()))f.remove();
+    });
+    all(':scope > .warn',details).forEach(function(w){
+      var t=(w.textContent||'').trim();
+      if(/^(?:Исполнитель:|Ответственные:|Тип действия:\s*Создать задачу\.\s*Исполнитель:)/i.test(t)){
+        taskDataFromText(t,data);w.remove();
+      } else if(/^Весь день:\s*(?:checked|unchecked|отмечено|не отмечено)$/i.test(t)){
+        if(/^Весь день:\s*(?:checked|отмечено)$/i.test(t))data.allDay=true;w.remove();
+      }
+    });
+    var val=readableTaskSettings(data);if(!val)return;
+    var f=document.createElement('div');f.className='field';
+    var k=document.createElement('div');k.className='key';k.textContent='Настройки задачи';
+    var v=document.createElement('div');v.textContent=val;f.appendChild(k);f.appendChild(v);
+    var status=all(':scope > .field',details).find(function(x){return parseName(x)==='Статус';});
+    details.insertBefore(f,status||q('.link',details)||null);
+  }
+  function tidyRedundantNotes(card,details) {
+    all(':scope > .warn',details).forEach(function(w){
+      var t=(w.textContent||'').trim();
+      if(/^(?:Выполнять действие сразу|Автоматическое извлечение 26\.11|Использовал ссылку https?:\/\/|Не реконструировано, данные из реального просмотра страницы|Выполнено ТОЛЬКО ЧТЕНИЕ|Параметры задачи:\s*не подтверждено)/i.test(t)||
+        /^Это (?:начисление бонусов|переход по воронке)|^Автодействие переводит заявку: текстового сообщения в нём нет/i.test(t)||
+        /^Время срабатывания:\s*5 сек|^При смене этапа воронки задержка из настроек интеграции ФБЧ \(5 сек\)/i.test(t)){w.remove();return;}
+      if(/^Филиал:\s*[^.;]+(?:\.\s*)?$/i.test(t)){
+        var conditions=all(':scope > .field',details).find(function(f){return parseName(f)==='Условия';});
+        if(!conditions){conditions=document.createElement('div');conditions.className='field';conditions.innerHTML='<div class="key">Условия</div><div></div>';details.insertBefore(conditions,q('.link',details)||null);}
+        var value=Array.prototype.filter.call(conditions.children,function(e){return !e.classList.contains('key');})[0];
+        if(value&&!/Филиал\s*:/i.test(value.textContent))value.textContent+=(value.textContent.trim()?'; ':'')+t.replace(/\s*\(пустое\)\s*$/i,'').replace(/\.$/,'');
+        w.remove();
+      } else if(/^(?:Исполнитель:|Ответственные:)/i.test(t)){
+        if(card.getAttribute('data-kind')!=='Задача'){
+          var field=document.createElement('div');field.className='field';var key=document.createElement('div');key.className='key';key.textContent='Исполнитель';
+          var value=document.createElement('div');value.textContent=t.replace(/^.*?:\s*/,'').replace(/\.$/,'');
+          field.appendChild(key);field.appendChild(value);details.insertBefore(field,q('.link',details)||null);
+        }
+        w.remove();
+      }
+    });
+  }
   function tidyCardDetails(card) {
     var details=q('.details',card);
     if(!details)return;
+    normalizeTaskSettings(card,details);
+    tidyRedundantNotes(card,details);
     var isFunnel=card.getAttribute('data-kind')==='Воронка';
     all(':scope > .field',details).forEach(function(field){
       var label=parseName(field);
