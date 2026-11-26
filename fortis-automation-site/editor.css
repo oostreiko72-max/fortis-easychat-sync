@@ -72,8 +72,9 @@
   border:1px solid #f0dcbc;
   font-weight:750;
 }
-/* Важная: красная рамка только вокруг метки, без смены основного цвета. */
-.rule.staff-task .kind.fe-priority-important {
+/* Важная: только красная рамка метки, исходные фон и цвет остаются прежними. */
+.rule.staff-task:not(.staff-call) .kind.task.fe-priority-important,
+.rule.staff-call .kind.phone.fe-priority-important {
   border:2px solid #c43d47;
   font-weight:800;
 }
