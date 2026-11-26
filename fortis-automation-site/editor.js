@@ -259,6 +259,7 @@
         values.forEach(cleanTextNodes);
         if(label==='Условия'&&values.length) {
           var concise=compactSubscriptionCondition(values[0].textContent);
+          if(cardId(card)==='124')concise=concise.replace(/;\s*Способ оплаты:\s*CloudPayments/gi,'');
           if(concise!==values[0].textContent)values[0].textContent=concise;
         }
         if(label==='Когда'&&values.length) {
@@ -428,6 +429,7 @@
     all('details.rule').forEach(function (c) {
       var id=cardId(c);
       if(id)c.setAttribute('data-fe-id',id);
+      if(c.hasAttribute('data-fe-unverified-id'))return;
       var summary=q('summary',c);
       if(summary&&!q('.fe-edit-card',summary)){
         var btn=document.createElement('button');
@@ -481,6 +483,7 @@
     return stage?q('.stack',stage):null;
   }
   function applyCard(id,data) {
+    if(String(id)==='162')return; // Action «Постоянные» no longer exists in Fitbase.
     if(!data || typeof data!=='object')return;
     var card=cardById(id)||buildCard(id);
     var loc=(/^Г\s*[-–]/i.test(data.code||''))?'Г':(data.stage||'Г');
