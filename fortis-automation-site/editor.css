@@ -59,18 +59,22 @@
 }
 .rule.staff-call .rname {color:inherit !important}
 .rule.staff-call summary::before {content:none !important;display:none !important}
-.rule.staff-task .kind.task,
-.rule.staff-call .kind.phone {
-  background:#e7ecf4;
-  color:#4e6581;
-  border:1px solid transparent;
+/* Задача — спокойный синий, звонок — мягкий тёплый янтарный. */
+.rule.staff-task:not(.staff-call) .kind.task {
+  background:#e5edf8;
+  color:#47668e;
+  border:1px solid #d3e0f1;
   font-weight:750;
 }
-/* Красная рамка ТОЛЬКО у метки задачи/звонка со статусом «Важная». */
+.rule.staff-call .kind.phone {
+  background:#fff0dc;
+  color:#90652f;
+  border:1px solid #f0dcbc;
+  font-weight:750;
+}
+/* Важная: красная рамка только вокруг метки, без смены основного цвета. */
 .rule.staff-task .kind.fe-priority-important {
-  background:#fff;
-  color:#a72e39;
-  border:1px solid #c43d47;
+  border:2px solid #c43d47;
   font-weight:800;
 }
 .fe-dialog .fe-checkbox.fe-call-choice{display:flex;flex-direction:row;align-items:center;gap:8px;font-size:12px;line-height:1.5;font-weight:700;background:#fdf0f0;border:1px solid #edd0d0;padding:10px;border-radius:8px}

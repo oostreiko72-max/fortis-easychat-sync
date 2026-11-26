@@ -139,11 +139,17 @@
       else if(child.nodeType===1)cleanTextNodes(child);
     });
   }
+  function isFunnelOnlyTextField(label) {
+    return /^(?:Текст задачи\s*\/\s*сообщения|Текст сообщения|Текст задачи|Полный текст задачи\s*\/\s*сообщения)$/i.test(String(label||'').trim());
+  }
   function tidyCardDetails(card) {
     var details=q('.details',card);
     if(!details)return;
+    var isFunnel=card.getAttribute('data-kind')==='Воронка';
     all(':scope > .field',details).forEach(function(field){
       var label=parseName(field);
+      // Funnel transitions have no task/message body — do not show empty placeholder fields.
+      if(isFunnel && isFunnelOnlyTextField(label)){field.remove();return;}
       var values=Array.prototype.filter.call(field.children,function(n){return n.nodeType===1&&!n.classList.contains('key');});
       if(label==='Статус') {
         field.classList.add('fe-status-field');
@@ -384,6 +390,7 @@
     if(badge){badge.className='kind '+(isCall?'phone':STYLES[type][0]);badge.textContent=isCall?'☎ Звонок':STYLES[type][1]+' '+type;}
     if(data.created)card.setAttribute('data-fe-created','true');
     var fields=Array.isArray(data.fields)?data.fields:[];
+    if(type==='Воронка')fields=fields.filter(function(f){return !f||!isFunnelOnlyTextField(f.label);});
     var html=fields.filter(function(f){return f && String(f.label||'').trim()}).map(function (f){
       var val=String(f.value||'');
       return '<div class="field"><div class="key">'+esc(f.label)+'</div>'
@@ -462,7 +469,7 @@
       var fields=all('.fe-fieldrow',q('#fe-fields')).map(function(r){
         return {label:q('.fe-field-label',r).value.trim(),value:q('.fe-field-value',r).value,
           body:q('.fe-field-body',r).checked};
-      }).filter(function(f){return f.label;});
+      }).filter(function(f){return f.label && (q('#fe-type').value!=='Воронка'||!isFunnelOnlyTextField(f.label));});
       draft.cards[id]={id:id,code:code,title:title,kind:q('#fe-type').value,isCall:q('#fe-type').value==='Задача'&&q('#fe-call').checked,stage:dest,
         fields:fields,notes:q('#fe-notes').value.trim(),created:!editingId || (cardById(id)?.getAttribute('data-fe-created')==='true')};
     }
