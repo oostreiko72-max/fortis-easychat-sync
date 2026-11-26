@@ -224,7 +224,7 @@
       var t=(w.textContent||'').trim();
       if(/^(?:Выполнять действие сразу|Автоматическое извлечение 26\.11|Использовал ссылку https?:\/\/|Не реконструировано, данные из реального просмотра страницы|Выполнено ТОЛЬКО ЧТЕНИЕ|Параметры задачи:\s*не подтверждено)/i.test(t)||
         /^Это (?:начисление бонусов|переход по воронке)|^Автодействие переводит заявку: текстового сообщения в нём нет/i.test(t)||
-        /^Время срабатывания:\s*5 сек|^При смене этапа воронки задержка из настроек интеграции ФБЧ \(5 сек\)/i.test(t)){w.remove();return;}
+        /^Время срабатывания:\s*5 сек|^При смене этапа воронки задержка из настроек интеграции ФБЧ \(5 сек\)|^Дата следующего платежа:\s*0\s*;\s*Смещение:\s*0\s*$/i.test(t)){w.remove();return;}
       if(/^Филиал:\s*[^.;]+(?:\.\s*)?$/i.test(t)){
         var conditions=all(':scope > .field',details).find(function(f){return parseName(f)==='Условия';});
         if(!conditions){conditions=document.createElement('div');conditions.className='field';conditions.innerHTML='<div class="key">Условия</div><div></div>';details.insertBefore(conditions,q('.link',details)||null);}
