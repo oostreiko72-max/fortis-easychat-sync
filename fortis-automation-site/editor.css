@@ -84,3 +84,17 @@
   font-weight:800;
   white-space:nowrap;
 }
+
+/* Единое короткое отображение статуса автодействия в раскрытой карточке. */
+.rule .field.fe-status-field {
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+  column-gap:5px;
+}
+.rule .field.fe-status-field > .key {
+  margin:0;
+  font-size:11px;
+}
+.rule .field.fe-status-field > .key::after {content:':';}
+.rule .field.fe-status-field > div:not(.key) {font-size:11px;font-weight:700;}

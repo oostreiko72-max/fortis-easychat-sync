@@ -114,6 +114,46 @@
     if(id && id.nextElementSibling!==badge)id.insertAdjacentElement('afterend',badge);
     else if(!badge.isConnected)foot.appendChild(badge);
   }
+  // Only presentation text is cleaned; identifiers, links and Fitbase rules are unchanged.
+  function formatStatusLabel(value) {
+    var s=String(value||'').trim();
+    if(/^(?:Выключено|Отключено|ВЫКЛ|ОТКЛ|disabled|inactive|off|false)(?=$|[\s(:;,.])/i.test(s))return 'Выключено';
+    if(/^(?:Включено|ВКЛ|Активно|Активна|Активен|active|enabled)(?=$|[\s(:;,.])/i.test(s))return 'Активно';
+    return 'Требует проверки';
+  }
+  function stripTechnicalText(value) {
+    var placeholders=[], s=String(value||'');
+    s=s.replace(/\{\{[^{}]+\}\}/g,function(m){
+      var tag='\uE000'+placeholders.length+'\uE001';placeholders.push([tag,m]);return tag;
+    });
+    s=s.replace(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\s*\(([^()]*[А-Яа-яЁё][^()]*)\)/gi,function(_,title){return title;});
+    s=s.replace(/\s*[\[(](?:[a-z][a-z0-9]*(?:_[a-z0-9]+)+(?:\s*[=:]\s*[^)\]]+)?|(?:value|id)\s*[=:]\s*[^)\]]+|enabled|unchecked|offset)\s*[\])]/gi,'');
+    s=s.replace(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+(?:\s*=\s*(?:"|&quot;)?[a-z0-9]+(?:"|&quot;)?)?/gi,'');
+    s=s.replace(/^[ \t]*[—–-]\s*/gm,'').replace(/ {2,}/g,' ').replace(/ +([.,;])/g,'$1');
+    placeholders.forEach(function(x){s=s.split(x[0]).join(x[1]);});
+    return s;
+  }
+  function cleanTextNodes(node) {
+    Array.prototype.forEach.call(node.childNodes,function(child){
+      if(child.nodeType===3)child.nodeValue=stripTechnicalText(child.nodeValue);
+      else if(child.nodeType===1)cleanTextNodes(child);
+    });
+  }
+  function tidyCardDetails(card) {
+    var details=q('.details',card);
+    if(!details)return;
+    all(':scope > .field',details).forEach(function(field){
+      var label=parseName(field);
+      var values=Array.prototype.filter.call(field.children,function(n){return n.nodeType===1&&!n.classList.contains('key');});
+      if(label==='Статус') {
+        field.classList.add('fe-status-field');
+        if(values.length)values[0].textContent=formatStatusLabel(values[0].textContent);
+      } else {
+        values.forEach(cleanTextNodes);
+      }
+    });
+    all(':scope > .warn',details).forEach(cleanTextNodes);
+  }
   function parseWarnings(card) {
     var detail = q('.details',card);
     return detail ? all(':scope > .warn',detail).map(function (n) { return n.textContent.trim(); }).filter(Boolean).join('\n\n') : '';
@@ -402,7 +442,7 @@
     Object.keys(source.cards).forEach(function(id){applyCard(id,source.cards[id]);});
     Object.keys(draft.stages).forEach(function(id){applyStage(id,draft.stages[id]);});
     Object.keys(draft.cards).forEach(function(id){applyCard(id,draft.cards[id]);});
-    sortStacks();all('details.rule').forEach(updateDisabledMarker);all('details.rule.staff-task').forEach(setTaskPriorityMarker);addEditButtons();countCards();updateStatus();
+    sortStacks();all('details.rule').forEach(tidyCardDetails);all('details.rule').forEach(updateDisabledMarker);all('details.rule.staff-task').forEach(setTaskPriorityMarker);addEditButtons();countCards();updateStatus();
   }
   function onSubmit(e) {
     e.preventDefault();
