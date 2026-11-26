@@ -69,6 +69,26 @@
       return {label:parseName(f),value:value,body:!!q('.bodytext',f)};
     }).filter(function (f) { return f.label; });
   }
+  function setTaskPriorityMarker(card) {
+    var badge=q('summary .kind',card);
+    if(!badge)return;
+    if(card.getAttribute('data-kind')!=='Задача') {
+      badge.classList.remove('fe-priority-important');
+      return;
+    }
+    // Read only task-priority fields, never the task body or automation enabled state.
+    var evidence=parseFields(card).filter(function(f){
+      return /^(?:Параметры(?: задачи)?|Переход\s*\/\s*результат|Статус задачи|Приоритет(?: задачи)?|Срочность)$/i.test(f.label);
+    }).map(function(f){return f.value;}).join('; ');
+    var statuses=[];
+    var pattern=/(?:Статус(?: задачи)?|Приоритет(?: задачи)?|Срочность)\s*[:=]\s*(Важная|Обычная)(?=$|[\s;,.|])/gi;
+    var hit;
+    while((hit=pattern.exec(evidence))!==null)statuses.push(hit[1].toLowerCase());
+    // Unknown or conflicting statuses stay neutral.
+    var important=statuses.length?statuses.every(function(s){return s==='важная';})
+      : /(?:^|[;,.])\s*Важная(?=\s*(?:$|[;,.]))/i.test(evidence);
+    badge.classList.toggle('fe-priority-important',important);
+  }
   function parseWarnings(card) {
     var detail = q('.details',card);
     return detail ? all(':scope > .warn',detail).map(function (n) { return n.textContent.trim(); }).filter(Boolean).join('\n\n') : '';
@@ -168,7 +188,7 @@
      + '<label class="fe-wide">Название автодействия<input id="fe-card-title" required maxlength="250"></label>'
      + '<label>Тип действия<select id="fe-type"></select></label>'
      + '<label>Воронка / этап<select id="fe-location"></select></label>'
-     + '<label class="fe-wide fe-checkbox fe-call-choice" id="fe-call-row"><input id="fe-call" type="checkbox"> ☎ Это задача на звонок — показывать «Звонок» на закрытой карточке с усиленной красной рамкой</label></div>'
+     + '<label class="fe-wide fe-checkbox fe-call-choice" id="fe-call-row"><input id="fe-call" type="checkbox"> ☎ Это задача на звонок — показывать «Звонок» на закрытой карточке. Красная рамка только при статусе задачи «Важная»</label></div>'
      + '<h3 class="fe-subtitle">Поля карточки</h3>'
      + '<div id="fe-fields"></div>'
      + '<button type="button" class="fe-add-field" data-fe-action="add-field">＋ Добавить поле</button>'
@@ -357,7 +377,7 @@
     Object.keys(source.cards).forEach(function(id){applyCard(id,source.cards[id]);});
     Object.keys(draft.stages).forEach(function(id){applyStage(id,draft.stages[id]);});
     Object.keys(draft.cards).forEach(function(id){applyCard(id,draft.cards[id]);});
-    sortStacks();addEditButtons();countCards();updateStatus();
+    sortStacks();all('details.rule.staff-task').forEach(setTaskPriorityMarker);addEditButtons();countCards();updateStatus();
   }
   function onSubmit(e) {
     e.preventDefault();

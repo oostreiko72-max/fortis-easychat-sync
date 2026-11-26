@@ -59,17 +59,19 @@
 }
 .rule.staff-call .rname {color:inherit !important}
 .rule.staff-call summary::before {content:none !important;display:none !important}
-.rule.staff-task .kind.task {
-  background:#f9e6e7;
-  color:#a72e39;
-  border:1px solid #e7b6bb;
-  font-weight:800;
-}
+.rule.staff-task .kind.task,
 .rule.staff-call .kind.phone {
-  background:#ba3341;
-  color:#fff;
-  border:1px solid #ba3341;
-  font-weight:810;
+  background:#e7ecf4;
+  color:#4e6581;
+  border:1px solid transparent;
+  font-weight:750;
+}
+/* Красная рамка ТОЛЬКО у метки задачи/звонка со статусом «Важная». */
+.rule.staff-task .kind.fe-priority-important {
+  background:#fff;
+  color:#a72e39;
+  border:1px solid #c43d47;
+  font-weight:800;
 }
 .fe-dialog .fe-checkbox.fe-call-choice{display:flex;flex-direction:row;align-items:center;gap:8px;font-size:12px;line-height:1.5;font-weight:700;background:#fdf0f0;border:1px solid #edd0d0;padding:10px;border-radius:8px}
 .fe-dialog .fe-checkbox.fe-call-choice input{width:18px;height:18px;flex:0 0 18px;accent-color:#b93440}
