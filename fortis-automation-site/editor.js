@@ -108,7 +108,7 @@
     var statusFields=parseFields(card).filter(function(f){
       return /^(?:Статус|Статус автодействия|Состояние)$/i.test(f.label);
     });
-    var isOff=statusFields.some(function(f){
+    var isOff=cardId(card)==='282'||statusFields.some(function(f){
       return /^(?:Выключено|Отключено|ВЫКЛ|ВЫКЛЮЧЕНО|ОТКЛЮЧЕНО|НЕАКТИВНО|DISABLED|INACTIVE|OFF|FALSE)(?=$|[\s(:;,.])/i.test(f.value.trim());
     });
     var badges=all('.fe-disabled-label',foot);
@@ -168,9 +168,11 @@
     return s;
   }
   function correctReviewedStatus(card,value) {
-    // Respect a newly-entered definite status; upgrade only an older unknown value.
-    if(String(value||'').trim()!=='Требует проверки')return value;
+    // Confirmed Fitbase status: ID 282 / 2.1.8 is disabled. Enforce it over stale local browser drafts.
     var id=cardId(card);
+    if(id==='282')return 'Выключено';
+    // Respect a newly-entered definite status for other cards; upgrade only older unknown values.
+    if(String(value||'').trim()!=='Требует проверки')return value;
     if(id==='289')return 'Активно'; // 2.2.3
     if(id==='287')return 'Выключено'; // 2.1.13
     return value;
